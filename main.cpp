@@ -1,30 +1,31 @@
 #include <bits/stdc++.h>
-#include <unistd.h>
+#include <cstdint>
+
 using namespace std;
 
 /**
  * Reference: www.geeksforgeeks.org/dsa/ford-fulkerson-algorithm-for-maximum-flow-problem/
  */
 
-bool bfs(vector<array<int, 3>> &rGraph,
-	int V,
-	int src,
-	int sink,
-	vector<int> &parent) {
+bool bfs(vector<array<int64_t, 3>> &rGraph,
+	int64_t V,
+	int64_t src,
+	int64_t sink,
+	vector<int64_t> &parent) {
 
 	vector<bool> vis(V + 1, false);
-	queue<int> q;
+	queue<int64_t> q;
 
 	q.push(src);
 	vis[src] = true;
 	parent[src] = -1;
 
 	while (!q.empty()) {
-		int u = q.front();
+		int64_t u = q.front();
 		q.pop();
 
-		for (int i = 0; i < (int)rGraph.size(); i++) {
-			int v = rGraph[i][1];
+		for (int64_t i = 0; i < (int64_t)rGraph.size(); i++) {
+			int64_t v = rGraph[i][1];
 
 			if (rGraph[i][0] == u && !vis[v] && rGraph[i][2] > 0) {
 				vis[v] = true;
@@ -42,34 +43,31 @@ bool bfs(vector<array<int, 3>> &rGraph,
 	return false;
 }
 
-int findMaxFlow(int V, vector<array<int, 3>> &edges) {
-	vector<array<int, 3>> rGraph;
+int64_t findMaxFlow(int64_t V, int64_t src, int64_t sink, vector<array<int64_t, 3>> &edges) {
+	vector<array<int64_t, 3>> rGraph;
 
 	for (auto &edge : edges) {
-		int u = edge[0];
-		int v = edge[1];
-		int cap = edge[2];
+		int64_t u = edge[0];
+		int64_t v = edge[1];
+		int64_t cap = edge[2];
 
 		rGraph.push_back({u, v, cap});
 		rGraph.push_back({v, u, 0});
 	}
 
-	int src = 1;
-	int sink = V;
-
-	vector<int> parent(V + 1);
-	int maxFlow = 0;
+	vector<int64_t> parent(V + 1);
+	int64_t maxFlow = 0;
 
 	while (bfs(rGraph, V, src, sink, parent)) {
-		int pathFlow = INT_MAX;
+		int64_t pathFlow = INT64_MAX;
 
-		for (int v = sink; v != src; v = rGraph[parent[v]][0]) {
-			int i = parent[v];
+		for (int64_t v = sink; v != src; v = rGraph[parent[v]][0]) {
+			int64_t i = parent[v];
 			pathFlow = min(pathFlow, rGraph[i][2]);
 		}
 
-		for (int v = sink; v != src; v = rGraph[parent[v]][0]) {
-			int i = parent[v];
+		for (int64_t v = sink; v != src; v = rGraph[parent[v]][0]) {
+			int64_t i = parent[v];
 			rGraph[i][2] -= pathFlow;
 			rGraph[i ^ 1][2] += pathFlow;
 		}
@@ -89,8 +87,8 @@ int main() {
 		in = &file;
 	}
 
-	int V = 0;
-	vector<array<int, 3>> edges;
+	int64_t V = 0, src = 0, sink = 0;
+	vector<array<int64_t, 3>> edges;
 
 	string line;
 	while (getline(*in, line)) {
@@ -100,19 +98,19 @@ int main() {
 
 		if (type == 'p') {
 			string problem;
-			int E;
+			int64_t E;
 			ss >> problem >> V >> E;
 		} else if (type == 'a') {
-			int u, v, cap;
+			int64_t u, v, cap;
 			ss >> u >> v >> cap;
 			edges.push_back({u, v, cap});
 		}
 		else if (type == 'n') {
-			int id, char st; ss >> id >> st; 
+			int64_t id; char st; ss >> id >> st; 
 			if (st == 's') src = id; else if (st == 't') sink = id;
 		}
 	}
 
-	cout << findMaxFlow(V, edges) << endl;
+	cout << findMaxFlow(V, src, sink, edges) << endl;
 	return 0;
 }
